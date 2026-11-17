@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Trey's Adventure</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: Arial, Helvetica, sans-serif; background: #fff; color: #14532d; font-size: 24px; line-height: 1.5; overflow-x: hidden; }
+    header { background: #15803d; color: #fff; text-align: center; padding: 25px 15px; position: relative; overflow: hidden; }
+    header h1 { font-size: 56px; margin: 0; }
+    #tagline { font-size: 30px; font-style: italic; margin: 8px 0 0; min-height: 45px; }
+    .cloud { position: absolute; font-size: 50px; animation: drift 12s linear infinite; opacity: .8; }
+    @keyframes drift { from { left: -80px; } to { left: 105%; } }
+    #hud { position: sticky; top: 0; z-index: 10; background: #f0fdf4; border-bottom: 4px solid #15803d; padding: 10px 20px; display: flex; flex-wrap: wrap; gap: 20px; justify-content: space-between; align-items: center; font-size: 26px; font-weight: bold; }
+    #barWrap { flex: 1; min-width: 200px; height: 30px; background: #dcfce7; border: 3px solid #15803d; border-radius: 20px; overflow: hidden; }
+    #bar { height: 100%; width: 0; background: #15803d; transition: width .5s; }
+    main { max-width: 800px; margin: 0 auto; padding: 15px; }
+    .level { background: #f0fdf4; border: 4px solid #15803d; border-radius: 20px; padding: 20px 28px; margin: 25px 0; transition: opacity .4s; }
+    .level.locked { opacity: .45; filter: grayscale(.6); pointer-events: none; }
+    .level.done { background: #dcfce7; }
+    h2 { font-size: 38px; margin: 0 0 8px; color: #166534; }
+    button { font-size: 26px; background: #15803d; color: #fff; border: none; border-radius: 14px; padding: 12px 22px; margin: 6px 6px 0 0; cursor: pointer; transition: transform .15s, background .2s; }
+    button:hover { background: #166534; transform: scale(1.07); }
+    button:active { transform: scale(.94); }
+    button:disabled { opacity: .6; cursor: default; transform: none; }
+    button.right { background: #22c55e; }
+    .msg { font-weight: bold; min-height: 40px; margin-top: 10px; }
+    .play { position: relative; height: 260px; border: 3px solid #15803d; border-radius: 12px; overflow: hidden; user-select: none; touch-action: none; }
+    .pop { animation: pop .3s; }
+    @keyframes pop { from { transform: scale(0); } to { transform: scale(1); } }
+    .shake { animation: shake .3s; }
+    @keyframes shake { 25% { transform: translateX(-8px); } 75% { transform: translateX(8px); } }
+    .badge { display: inline-block; font-size: 50px; margin: 5px; animation: pop .5s; }
+    .confetti { position: fixed; top: -50px; font-size: 32px; pointer-events: none; animation: fall linear forwards; z-index: 99; }
+    @keyframes fall { to { transform: translateY(110vh) rotate(360deg); } }
+    .sprite { position: absolute; font-size: 44px; line-height: 44px; width: 44px; height: 44px; }
+
+    /* Flying */
+    #sky { background: linear-gradient(#bae6fd, #f0fdf4); cursor: ns-resize; }
+    /* Pickleball */
+    #court { background: #bbf7d0; cursor: none; }
+    #court::before { content: ""; position: absolute; left: 0; right: 0; top: 45%; border-top: 4px dashed #fff; }
+    #paddle { position: absolute; bottom: 10px; width: 120px; height: 22px; background: #15803d; border-radius: 12px; border: 3px solid #fff; left: 100px; }
+    /* Football */
+    #field { background: repeating-linear-gradient(#bbf7d0 0 40px, #dcfce7 40px 80px); cursor: crosshair; }
+    #zone { position: absolute; top: 0; left: 0; right: 0; height: 18px; background: #15803d; color: #fff; font-size: 14px; text-align: center; line-height: 18px; letter-spacing: 6px; }
+    /* Order / quiz / memory */
+    .opt { display: block; width: 100%; text-align: left; margin: 8px 0; background: #fff; color: #14532d; border: 3px solid #15803d; }
+    .opt:hover { background: #bbf7d0; }
+    .opt.used { background: #bbf7d0; opacity: .6; }
+    #memGrid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+    .card { height: 90px; font-size: 48px; background: #15803d; color: #fff; border-radius: 14px; display: flex; align-items: center; justify-content: center; cursor: pointer; margin: 0; padding: 0; }
+    .card.up { background: #fff; color: #000; border: 3px solid #15803d; }
+    .card.matched { background: #bbf7d0; border: 3px solid #22c55e; }
+    /* Odyssey sea */
+    #sea { background: linear-gradient(#7dd3fc, #0ea5e9); height: 300px; }
+    .lane { position: absolute; top: 0; bottom: 0; width: 33.333%; border-right: 2px dashed rgba(255,255,255,.6); }
+    #heart { font-size: 100px; text-align: center; cursor: pointer; user-select: none; }
+    footer { background: #15803d; color: #fff; text-align: center; padding: 20px; font-size: 26px; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="cloud" style="top:10px">☁️</div>
+    <div class="cloud" style="top:80px; animation-delay:-6s">☁️</div>
+    <h1>🎮 Trey's Adventure 🌱</h1>
+    <p id="tagline"></p>
+  </header>
+
+  <div id="hud">
+    <span>⭐ Score: <span id="score">0</span></span>
+    <div id="barWrap"><div id="bar"></div></div>
+    <span id="lvl">Level 1 / 9</span>
+  </div>
+
+  <main>
+    <!-- 1 Flying -->
+    <section class="level" id="l1">
+      <h2>✈️ Level 1: Hobby – Flying</h2>
+      <p>Move your mouse or finger up and down to steer the plane. Collect 6 ⭐ and dodge the 🐦 birds (a hit costs a star)!</p>
+      <div class="play" id="sky"><div class="sprite" id="plane" style="left:30px;top:110px">✈️</div></div>
+      <p class="msg" id="skyMsg">Stars: 0 / 6</p>
+      <button id="startSky">🛫 Take Off!</button>
+    </section>
+
+    <!-- 2 Pickleball -->
+    <section class="level locked" id="l2">
+      <h2>🏓 Level 2: Hobby – Pickleball Rally</h2>
+      <p>Slide the paddle with your mouse or finger. Return the ball 7 times in a row!</p>
+      <div class="play" id="court"><div class="sprite" id="pball" style="left:0;top:0">🟡</div><div id="paddle"></div></div>
+      <p class="msg" id="pMsg">Returns: 0 / 7</p>
+      <button id="startPb">🏓 Serve!</button>
+    </section>
+
+    <!-- 3 Football -->
+    <section class="level locked" id="l3">
+      <h2>🏈 Level 3: Hobby – Football Passing</h2>
+      <p>Tap the field to throw. Aim ahead of the moving receiver 🏃 for 3 touchdowns!</p>
+      <div class="play" id="field">
+        <div id="zone">END ZONE</div>
+        <div class="sprite" id="recv" style="top:30px">🏃</div>
+        <div class="sprite" id="fball" style="display:none">🏈</div>
+        <div class="sprite" id="qb" style="bottom:8px;left:50%;margin-left:-22px">🧍</div>
+      </div>
+      <p class="msg" id="fMsg">Touchdowns: 0 / 3</p>
+      <button id="startFb">🏈 Hike!</button>
+    </section>
+
+    <!-- 4 Science -->
+    <section class="level locked" id="l4">
+      <h2>🔬 Level 4: Skill – Science Lab Quiz</h2>
+      <div id="sciBox"></div>
+      <div class="msg" id="sciMsg"></div>
+    </section>
+
+    <!-- 5 History -->
+    <section class="level locked" id="l5">
+      <h2>📜 Level 5: Skill – History Timeline</h2>
+      <p>Tap the events in order from <b>oldest to newest</b>!</p>
+      <div id="histBox"></div>
+      <div class="msg" id="histMsg">Next up: pick the oldest event.</div>
+    </section>
+
+    <!-- 6 Doctor -->
+    <section class="level locked" id="l6">
+      <h2>🩺 Level 6: Goal – Doctor's Memory Match</h2>
+      <p>Flip cards to match all 4 pairs of medical gear!</p>
+      <div id="memGrid"></div>
+      <p class="msg" id="memMsg">Pairs found: 0 / 4</p>
+    </section>
+
+    <!-- 7 Odyssey -->
+    <section class="level locked" id="l7">
+      <h2>📖 Level 7: Book – Odysseus's Voyage</h2>
+      <p>Sail home like Odysseus! Tap a lane (or use the buttons / arrow keys) to dodge 🌊 waves and 👁️ Cyclops rocks. Dodge 10 hazards. You have 3 ❤️ lives.</p>
+      <div class="play" id="sea">
+        <div class="lane" style="left:0" data-lane="0"></div>
+        <div class="lane" style="left:33.333%" data-lane="1"></div>
+        <div class="lane" style="left:66.666%;border-right:none" data-lane="2"></div>
+        <div class="sprite" id="ship" style="bottom:10px">🚢</div>
+      </div>
+      <p class="msg" id="seaMsg">Dodged: 0 / 10 &nbsp; Lives: ❤️❤️❤️</p>
+      <button id="left">⬅️</button><button id="right">➡️</button><button id="startSea">⛵ Set Sail!</button>
+    </section>
+
+    <!-- 8 Fun fact -->
+    <section class="level locked" id="l8">
+      <h2>🛩️ Level 8: Fun Fact – Planes vs. Cars</h2>
+      <p>I have more time flying planes than driving cars! Catch 8 ✈️ planes. Tapping a 🚗 car loses one (−1)!</p>
+      <div class="play" id="arena" style="height:220px;background:linear-gradient(#dcfce7,#fff);cursor:crosshair"></div>
+      <p class="msg" id="flyMsg">Planes caught: 0 / 8</p>
+      <button id="startFly">🛫 Go!</button>
+    </section>
+
+    <!-- 9 Final -->
+    <section class="level locked" id="l9">
+      <h2>🏆 Level 9: Final Stage</h2>
+      <div style="text-align:center">
+        <p>Collect all your badges!</p>
+        <div id="badges"></div>
+        <p>Tap the heart for Trey's goal: <b>Become a doctor</b>! 10 beats to finish.</p>
+        <div id="heart">❤️</div>
+        <p class="msg" id="finalMsg">Heartbeats: 0 / 10</p>
+      </div>
+    </section>
+  </main>
+
+  <footer>🌿 Thanks for playing! 🌿</footer>
+
+  <script>
+    const TOTAL = 9;
+    let score = 0;
+    const $ = id => document.getElementById(id);
+    const shuffle = a => a.map(v => [Math.random(), v]).sort((x, y) => x[0] - y[0]).map(x => x[1]);
+
+    // Tagline typing
+    const text = "Growing one step at a time";
+    let ti = 0;
+    (function type() {
+      $("tagline").textContent = '"' + text.slice(0, ti) + (ti < text.length ? "" : '"');
+      if (ti++ < text.length) setTimeout(type, 90);
+    })();
+
+    function addScore(n) { score = Math.max(0, score + n); $("score").textContent = score; }
+    function burst(emoji, n) {
+      for (let k = 0; k < n; k++) {
+        const c = document.createElement("div");
+        c.className = "confetti"; c.textContent = emoji;
+        c.style.left = Math.random() * 100 + "vw";
+        c.style.animationDuration = 2 + Math.random() * 2 + "s";
+        document.body.appendChild(c);
+        setTimeout(() => c.remove(), 4500);
+      }
+    }
+
+    const badgeList = ["✈️","🏓","🏈","🔬","📜","🩺","📖","🛩️"];
+    function completeLevel(n) {
+      $("l" + n).classList.add("done");
+      if (n <= 8) $("badges").innerHTML += '<span class="badge">' + badgeList[n - 1] + '</span>';
+      $("bar").style.width = (n / TOTAL * 100) + "%";
+      addScore(50); burst("⭐", 12);
+      if (n < TOTAL) {
+        const next = $("l" + (n + 1));
+        next.classList.remove("locked");
+        $("lvl").textContent = "Level " + (n + 1) + " / " + TOTAL;
+        next.scrollIntoView({ behavior: "smooth", block: "center" });
+      }
+    }
+
+    // ===== 1. Flying =====
+    const sky = $("sky"), plane = $("plane");
+    let skyRun = false, planeY = 110, stars = 0, skyItems = [], skyLast = 0, skySpawn = 0;
+    sky.addEventListener("pointermove", e => {
+      const r = sky.getBoundingClientRect();
+      planeY = Math.max(0, Math.min(r.height - 44, e.clientY - r.top - 22));
+      plane.style.top = planeY + "px";
+    });
+    sky.addEventListener("pointerdown", e => sky.dispatchEvent(new PointerEvent("pointermove", e)));
+    function skyLoop(now) {
+      if (!skyRun) return;
+      const dt = Math.min(40, now - skyLast) / 16; skyLast = now;
+      const W = sky.clientWidth, H = sky.clientHeight;
+      if (now > skySpawn) {
+        skySpawn = now + 650;
+        const bird = Math.random() < 0.4;
+        const el = document.createElement("div");
+        el.className = "sprite"; el.textContent = bird ? "🐦" : "⭐";
+        const it = { el, bird, x: W, y: Math.random() * (H - 44) };
+        skyItems.push(it); sky.appendChild(el);
+      }
+      skyItems = skyItems.filter(it => {
+        it.x -= 4 * dt;
+        it.el.style.left = it.x + "px"; it.el.style.top = it.y + "px";
+        const hit = it.x < 74 && it.x > -10 && Math.abs(it.y - planeY) < 38;
+        if (hit) {
+          it.el.remove();
+          if (it.bird) { stars = Math.max(0, stars - 1); addScore(-2); sky.classList.add("shake"); setTimeout(() => sky.classList.remove("shake"), 300); }
+          else { stars++; addScore(5); }
+          $("skyMsg").textContent = "Stars: " + stars + " / 6";
+          if (stars >= 6) {
+            skyRun = false; skyItems.forEach(i => i.el.remove()); skyItems = [];
+            $("skyMsg").textContent = "🛬 Perfect flight! 6 stars collected!";
+            $("startSky").disabled = true; completeLevel(1);
+          }
+          return false;
+        }
+        if (it.x < -50) { it.el.remove(); return false; }
+        return true;
+      });
+      if (skyRun) requestAnimationFrame(skyLoop);
+    }
+    $("startSky").addEventListener("click", () => {
+      if (skyRun) return;
+      stars = 0; skyRun = true; skyLast = performance.now(); skySpawn = 0;
+      $("skyMsg").textContent = "Stars: 0 / 6";
+      requestAnimationFrame(skyLoop);
+    });
+
+    // ===== 2. Pickleball =====
+    const court = $("court"), pball = $("pball"), paddle = $("paddle");
+    let pbRun = false, bx = 0, by = 0, bvx = 0, bvy = 0, pbHits = 0, padX = 100;
+    const BALL = 44, PADW = 120;
+    function setPaddle(x) {
+      const r = court.getBoundingClientRect();
+      padX = Math.max(0, Math.min(r.width - PADW, x - r.left - PADW / 2));
+      paddle.style.left = padX + "px";
+    }
+    court.addEventListener("pointermove", e => setPaddle(e.clientX));
+    court.addEventListener("pointerdown", e => setPaddle(e.clientX));
+    function pbLoop() {
+      if (!pbRun) return;
+      const W = court.clientWidth, H = court.clientHeight;
+      bx += bvx; by += bvy;
+      if (bx < 0) { bx = 0; bvx = Math.abs(bvx); }
+      if (bx > W - BALL) { bx = W - BALL; bvx = -Math.abs(bvx); }
+      if (by < 0) { by = 0; bvy = Math.abs(bvy); }
+      const padTop = H - 32;
+      if (bvy > 0 && by + BALL >= padTop && by + BALL <= padTop + 24) {
+        const cx = bx + BALL / 2;
+        if (cx >= padX - 10 && cx <= padX + PADW + 10) {
+          bvy = -Math.min(Math.abs(bvy) * 1.06, 9);
+          bvx = Math.max(-8, Math.min(8, bvx * 1.04 + ((cx - (padX + PADW / 2)) / PADW) * 3));
+          pbHits++; addScore(3);
+          $("pMsg").textContent = "Returns: " + pbHits + " / 7";
+          if (pbHits >= 7) {
+            pbRun = false; $("pMsg").textContent = "🏓 Game, set, match!";
+            $("startPb").disabled = true; completeLevel(2); return;
+          }
+        }
+      }
+      if (by > H) { pbRun = false; $("pMsg").textContent = "💨 Missed it! Press Serve to try again."; $("startPb").disabled = false; return; }
+      pball.style.left = bx + "px"; pball.style.top = by + "px";
+      requestAnimationFrame(pbLoop);
+    }
+    $("startPb").addEventListener("click", () => {
+      if (pbRun) return;
+      pbHits = 0; pbRun = true;
+      bx = court.clientWidth / 2 - BALL / 2; by = 10;
+      bvx = (Math.random() < .5 ? -1 : 1) * 3; bvy = 3.5;
+      $("pMsg").textContent = "Returns: 0 / 7"; $("startPb").disabled = true;
+      requestAnimationFrame(pbLoop);
+    });
+
+    // ===== 3. Football =====
+    const field = $("field"), recv = $("recv"), fball = $("fball");
+    let fbRun = false, throwing = false, tds = 0, fbStart = 0;
+    const recvX = () => (field.clientWidth - 44) * (0.5 + 0.5 * Math.sin((performance.now() - fbStart) / 650));
+    function fbLoop() { if (!fbRun) return; recv.style.left = recvX() + "px"; requestAnimationFrame(fbLoop); }
+    field.addEventListener("pointerdown", e => {
+      if (!fbRun || throwing) return;
+      const r = field.getBoundingClientRect();
+      const tx = Math.max(20, Math.min(r.width - 20, e.clientX - r.left));
+      const sx = r.width / 2, sy = r.height - 60, ty = 50;
+      throwing = true; fball.style.display = "block";
+      const t0 = performance.now();
+      (function fly(now) {
+        const p = Math.min(1, (now - t0) / 550);
+        fball.style.left = (sx + (tx - sx) * p - 22) + "px";
+        fball.style.top = (sy + (ty - sy) * p - 22) + "px";
+        if (p < 1) return requestAnimationFrame(fly);
+        fball.style.display = "none"; throwing = false;
+        if (Math.abs(recvX() + 22 - tx) < 45) {
+          tds++; addScore(10); burst("🏈", 6);
+          $("fMsg").textContent = "🎉 TOUCHDOWN! Touchdowns: " + tds + " / 3";
+          if (tds >= 3) { fbRun = false; $("fMsg").textContent = "🏆 Hat trick!"; $("startFb").disabled = true; completeLevel(3); }
+        } else $("fMsg").textContent = "❌ Incomplete! Lead the receiver more. Touchdowns: " + tds + " / 3";
+      })(t0);
+    });
+    $("startFb").addEventListener("click", () => {
+      if (fbRun) return;
+      fbRun = true; tds = 0; fbStart = performance.now();
+      $("fMsg").textContent = "Touchdowns: 0 / 3"; $("startFb").disabled = true;
+      requestAnimationFrame(fbLoop);
+    });
+
+    // ===== 4. Science quiz =====
+    const sciQs = [
+      { q: "Which organ pumps blood around the body? 🫀", o: ["Heart", "Stomach", "Kidney"], a: "Heart" },
+      { q: "What do red blood cells carry? 🩸", o: ["Oxygen", "Sunlight", "Bones"], a: "Oxygen" },
+      { q: "Which part of a cell holds its DNA? 🧬", o: ["Nucleus", "Cell wall", "Vacuole"], a: "Nucleus" }
+    ];
+    let sciI = 0;
+    function showSci() {
+      const q = sciQs[sciI];
+      $("sciBox").innerHTML = '<p><b>Question ' + (sciI + 1) + ' / 3:</b> ' + q.q + '</p>';
+      shuffle(q.o).forEach(o => {
+        const b = document.createElement("button");
+        b.className = "opt"; b.textContent = o;
+        b.onclick = () => {
+          if (o === q.a) {
+            addScore(10); burst("🔬", 4); sciI++;
+            if (sciI >= sciQs.length) { $("sciBox").innerHTML = ""; $("sciMsg").textContent = "🔬 Lab complete! 3 / 3 correct!"; completeLevel(4); }
+            else { $("sciMsg").textContent = "✅ Correct!"; showSci(); }
+          } else { $("sciMsg").textContent = "❌ Not quite, try again!"; addScore(-2); b.classList.add("shake"); setTimeout(() => b.classList.remove("shake"), 300); }
+        };
+        $("sciBox").appendChild(b);
+      });
+    }
+    showSci();
+
+    // ===== 5. History timeline =====
+    const events = [
+      { t: "🔺 Pyramids of Giza are built (about 2500 BCE)", n: 0 },
+      { t: "🏛️ First ancient Olympic Games (776 BCE)", n: 1 },
+      { t: "🦅 Roman Empire begins under Augustus (27 BCE)", n: 2 },
+      { t: "🏰 Western Roman Empire falls (476 CE)", n: 3 }
+    ];
+    let histNext = 0;
+    shuffle(events).forEach(ev => {
+      const b = document.createElement("button");
+      b.className = "opt"; b.textContent = ev.t;
+      b.onclick = () => {
+        if (b.classList.contains("used")) return;
+        if (ev.n === histNext) {
+          b.classList.add("used"); histNext++; addScore(8);
+          $("histMsg").textContent = histNext < 4 ? "✅ Right! Now pick the next oldest." : "";
+          if (histNext === 4) { $("histMsg").textContent = "📜 Perfect timeline!"; completeLevel(5); }
+        } else { $("histMsg").textContent = "❌ That one is newer. Try an older event!"; addScore(-2); b.classList.add("shake"); setTimeout(() => b.classList.remove("shake"), 300); }
+      };
+      $("histBox").appendChild(b);
+    });
+
+    // ===== 6. Memory match =====
+    let flipped = [], matched = 0, lock = false;
+    shuffle(["🩺","💉","🩹","💊","🩺","💉","🩹","💊"]).forEach(sym => {
+      const c = document.createElement("button");
+      c.className = "card"; c.textContent = "❓"; c.dataset.sym = sym;
+      c.onclick = () => {
+        if (lock || c.classList.contains("up") || c.classList.contains("matched")) return;
+        c.classList.add("up"); c.textContent = sym; flipped.push(c);
+        if (flipped.length === 2) {
+          const [a, b] = flipped; flipped = [];
+          if (a.dataset.sym === b.dataset.sym) {
+            a.classList.add("matched"); b.classList.add("matched"); matched++; addScore(8);
+            $("memMsg").textContent = "Pairs found: " + matched + " / 4";
+            if (matched === 4) { $("memMsg").textContent = "🩺 All pairs matched. Future doctor!"; completeLevel(6); }
+          } else {
+            lock = true;
+            setTimeout(() => { [a, b].forEach(x => { x.classList.remove("up"); x.textContent = "❓"; }); lock = false; }, 800);
+          }
+        }
+      };
+      $("memGrid").appendChild(c);
+    });
+
+    // ===== 7. Odyssey voyage =====
+    const sea = $("sea"), ship = $("ship");
+    let seaRun = false, lane = 1, dodged = 0, lives = 3, hazards = [], seaLast = 0, seaSpawn = 0;
+    function placeShip() { ship.style.left = (sea.clientWidth / 3 * lane + sea.clientWidth / 6 - 22) + "px"; }
+    function setLane(l) { lane = Math.max(0, Math.min(2, l)); placeShip(); }
+    placeShip(); window.addEventListener("resize", placeShip);
+    $("left").onclick = () => setLane(lane - 1);
+    $("right").onclick = () => setLane(lane + 1);
+    sea.addEventListener("pointerdown", e => { const r = sea.getBoundingClientRect(); setLane(Math.floor((e.clientX - r.left) / (r.width / 3))); });
+    document.addEventListener("keydown", e => {
+      if (!seaRun) return;
+      if (e.key === "ArrowLeft") { setLane(lane - 1); e.preventDefault(); }
+      if (e.key === "ArrowRight") { setLane(lane + 1); e.preventDefault(); }
+    });
+    const hearts = () => "❤️".repeat(lives) || "💔";
+    function seaStatus() { $("seaMsg").innerHTML = "Dodged: " + dodged + " / 10 &nbsp; Lives: " + hearts(); }
+    function seaLoop(now) {
+      if (!seaRun) return;
+      const dt = Math.min(40, now - seaLast) / 16; seaLast = now;
+      const H = sea.clientHeight, W = sea.clientWidth;
+      if (now > seaSpawn) {
+        seaSpawn = now + 800;
+        const el = document.createElement("div");
+        el.className = "sprite"; el.textContent = Math.random() < .5 ? "🌊" : "👁️";
+        const l = Math.floor(Math.random() * 3);
+        const h = { el, l, y: -44 };
+        el.style.left = (W / 3 * l + W / 6 - 22) + "px";
+        hazards.push(h); sea.appendChild(el);
+      }
+      hazards = hazards.filter(h => {
+        h.y += 3.2 * dt; h.el.style.top = h.y + "px";
+        if (h.l === lane && h.y > H - 10 - 44 - 30 && h.y < H - 10) {
+          h.el.remove(); lives--; addScore(-3); seaStatus();
+          sea.classList.add("shake"); setTimeout(() => sea.classList.remove("shake"), 300);
+          if (lives <= 0) {
+            seaRun = false; hazards.forEach(x => x.el.remove()); hazards = [];
+            $("seaMsg").innerHTML = "🌊 Shipwrecked! Press Set Sail to try again.";
+            $("startSea").disabled = false;
+          }
+          return false;
+        }
+        if (h.y > H) { h.el.remove(); dodged++; addScore(2); seaStatus();
+          if (dodged >= 10) {
+            seaRun = false; hazards.forEach(x => x.el.remove()); hazards = [];
+            $("seaMsg").textContent = "🏝️ Welcome home to Ithaca!";
+            $("startSea").disabled = true; completeLevel(7);
+          }
+          return false; }
+        return true;
+      });
+      if (seaRun) requestAnimationFrame(seaLoop);
+    }
+    $("startSea").addEventListener("click", () => {
+      if (seaRun) return;
+      dodged = 0; lives = 3; seaRun = true; seaLast = performance.now(); seaSpawn = 0; hazards.forEach(x => x.el.remove()); hazards = [];
+      $("startSea").disabled = true; seaStatus(); requestAnimationFrame(seaLoop);
+    });
+
+    // ===== 8. Planes vs cars =====
+    let caught = 0, flyTimer = null, running = false;
+    const arena = $("arena");
+    function spawn() {
+      if (!running) return;
+      const isCar = Math.random() < 0.3;
+      const t = document.createElement("div");
+      t.className = "sprite pop"; t.style.cursor = "pointer"; t.style.fontSize = "50px";
+      t.textContent = isCar ? "🚗" : "✈️";
+      t.style.left = Math.random() * (arena.clientWidth - 60) + "px";
+      t.style.top = Math.random() * (arena.clientHeight - 60) + "px";
+      t.addEventListener("pointerdown", e => {
+        e.stopPropagation();
+        if (!running) return;
+        t.remove();
+        if (isCar) { addScore(-1); caught = Math.max(0, caught - 1); } else { caught++; addScore(5); }
+        $("flyMsg").textContent = "Planes caught: " + caught + " / 8";
+        if (caught >= 8) {
+          running = false; clearInterval(flyTimer); arena.innerHTML = "";
+          $("flyMsg").textContent = "🛬 Smooth landing!"; $("startFly").disabled = true; completeLevel(8);
+        }
+      });
+      arena.appendChild(t);
+      setTimeout(() => t.remove(), 1600);
+    }
+    $("startFly").addEventListener("click", () => {
+      if (running) return;
+      caught = 0; running = true; $("flyMsg").textContent = "Planes caught: 0 / 8";
+      flyTimer = setInterval(spawn, 600);
+    });
+
+    // ===== 9. Final =====
+    let beats = 0;
+    $("heart").addEventListener("click", () => {
+      if (beats >= 10) return;
+      beats++; addScore(1);
+      $("finalMsg").textContent = "Heartbeats: " + beats + " / 10";
+      if (beats === 10) {
+        $("bar").style.width = "100%";
+        $("finalMsg").innerHTML = "🏆 YOU WIN! Final score: " + score + "<br>Trey's goal: become a doctor. 🩺 Growing one step at a time! 🌱";
+        ["🌱","✈️","🏓","🏈","🔬","📜","🩺","⭐"].forEach(e => burst(e, 6));
+        $("l9").classList.add("done");
+      }
+    });
+  </script>
+</body>
+</html>
