@@ -7,56 +7,72 @@
   <style>
     * { box-sizing: border-box; }
     body { margin: 0; font-family: Arial, Helvetica, sans-serif; background: #fff; color: #14532d; font-size: 24px; line-height: 1.5; overflow-x: hidden; }
-    header { background: #15803d; color: #fff; text-align: center; padding: 25px 15px; position: relative; overflow: hidden; }
-    header h1 { font-size: 56px; margin: 0; }
+    header { background: linear-gradient(135deg,#14532d,#22c55e,#15803d); background-size: 300% 300%; animation: bg 8s ease infinite; color: #fff; text-align: center; padding: 25px 15px; position: relative; overflow: hidden; }
+    @keyframes bg { 50% { background-position: 100% 50%; } }
+    header h1 { font-size: 56px; margin: 0; text-shadow: 0 0 20px #bbf7d0; animation: glow 2s ease-in-out infinite alternate; }
+    @keyframes glow { from { text-shadow: 0 0 6px #fff; } to { text-shadow: 0 0 28px #bbf7d0, 0 0 8px #fff; } }
     #tagline { font-size: 30px; font-style: italic; margin: 8px 0 0; min-height: 45px; }
     .cloud { position: absolute; font-size: 50px; animation: drift 12s linear infinite; opacity: .8; }
     @keyframes drift { from { left: -80px; } to { left: 105%; } }
-    #hud { position: sticky; top: 0; z-index: 10; background: #f0fdf4; border-bottom: 4px solid #15803d; padding: 10px 20px; display: flex; flex-wrap: wrap; gap: 20px; justify-content: space-between; align-items: center; font-size: 26px; font-weight: bold; }
-    #barWrap { flex: 1; min-width: 200px; height: 30px; background: #dcfce7; border: 3px solid #15803d; border-radius: 20px; overflow: hidden; }
-    #bar { height: 100%; width: 0; background: #15803d; transition: width .5s; }
+    #hud { position: sticky; top: 0; z-index: 10; background: #f0fdf4; border-bottom: 4px solid #15803d; padding: 10px 20px; display: flex; flex-wrap: wrap; gap: 14px; justify-content: space-between; align-items: center; font-size: 24px; font-weight: bold; }
+    #barWrap { flex: 1; min-width: 160px; height: 30px; background: #dcfce7; border: 3px solid #15803d; border-radius: 20px; overflow: hidden; }
+    #bar { height: 100%; width: 0; background: linear-gradient(90deg,#15803d,#4ade80); transition: width .5s; }
+    #combo { color: #ea580c; min-width: 110px; transition: transform .15s; }
+    #mute { font-size: 22px; padding: 4px 12px; margin: 0; }
     main { max-width: 800px; margin: 0 auto; padding: 15px; }
-    .level { background: #f0fdf4; border: 4px solid #15803d; border-radius: 20px; padding: 20px 28px; margin: 25px 0; transition: opacity .4s; }
+    .level { background: #f0fdf4; border: 4px solid #15803d; border-radius: 20px; padding: 20px 28px; margin: 25px 0; transition: opacity .4s; box-shadow: 0 4px 0 #166534; }
     .level.locked { opacity: .45; filter: grayscale(.6); pointer-events: none; }
-    .level.done { background: #dcfce7; }
+    .level.done { background: #dcfce7; box-shadow: 0 0 25px #4ade80; }
     h2 { font-size: 38px; margin: 0 0 8px; color: #166534; }
     button { font-size: 26px; background: #15803d; color: #fff; border: none; border-radius: 14px; padding: 12px 22px; margin: 6px 6px 0 0; cursor: pointer; transition: transform .15s, background .2s; }
     button:hover { background: #166534; transform: scale(1.07); }
     button:active { transform: scale(.94); }
     button:disabled { opacity: .6; cursor: default; transform: none; }
-    button.right { background: #22c55e; }
     .msg { font-weight: bold; min-height: 40px; margin-top: 10px; }
-    .play { position: relative; height: 260px; border: 3px solid #15803d; border-radius: 12px; overflow: hidden; user-select: none; touch-action: none; }
+    .play { position: relative; height: 280px; border: 3px solid #15803d; border-radius: 12px; overflow: hidden; user-select: none; touch-action: none; }
     .pop { animation: pop .3s; }
     @keyframes pop { from { transform: scale(0); } to { transform: scale(1); } }
     .shake { animation: shake .3s; }
     @keyframes shake { 25% { transform: translateX(-8px); } 75% { transform: translateX(8px); } }
+    .flash { animation: flash .35s; }
+    @keyframes flash { 0% { box-shadow: inset 0 0 0 200px rgba(239,68,68,.45); } 100% { box-shadow: inset 0 0 0 200px rgba(239,68,68,0); } }
     .badge { display: inline-block; font-size: 50px; margin: 5px; animation: pop .5s; }
     .confetti { position: fixed; top: -50px; font-size: 32px; pointer-events: none; animation: fall linear forwards; z-index: 99; }
     @keyframes fall { to { transform: translateY(110vh) rotate(360deg); } }
     .sprite { position: absolute; font-size: 44px; line-height: 44px; width: 44px; height: 44px; }
+    .float { position: absolute; font-weight: bold; font-size: 28px; color: #15803d; pointer-events: none; text-shadow: 0 0 4px #fff, 0 0 4px #fff; animation: floatUp .9s ease-out forwards; z-index: 5; white-space: nowrap; }
+    .float.bad { color: #dc2626; }
+    @keyframes floatUp { to { transform: translateY(-50px); opacity: 0; } }
+    .part { position: absolute; font-size: 20px; pointer-events: none; z-index: 4; transition: transform .6s ease-out, opacity .6s; }
+    .bigBanner { position: fixed; top: 35%; left: 0; right: 0; text-align: center; font-size: 64px; font-weight: bold; color: #15803d; text-shadow: 0 0 20px #fff, 0 0 10px #bbf7d0; pointer-events: none; z-index: 120; animation: banner 1.6s ease-out forwards; }
+    @keyframes banner { 0% { transform: scale(.3); opacity: 0; } 25% { transform: scale(1.1); opacity: 1; } 80% { opacity: 1; } 100% { transform: scale(1); opacity: 0; } }
 
-    /* Flying */
-    #sky { background: linear-gradient(#bae6fd, #f0fdf4); cursor: ns-resize; }
-    /* Pickleball */
+    #sky { background: linear-gradient(#7dd3fc, #f0fdf4); cursor: ns-resize; }
+    #sky .bgc { position: absolute; font-size: 60px; opacity: .5; animation: drift 9s linear infinite; }
+    #plane { transition: transform .1s; }
+    #plane.shield { filter: drop-shadow(0 0 10px #22c55e) drop-shadow(0 0 6px #fff); }
     #court { background: #bbf7d0; cursor: none; }
     #court::before { content: ""; position: absolute; left: 0; right: 0; top: 45%; border-top: 4px dashed #fff; }
-    #paddle { position: absolute; bottom: 10px; width: 120px; height: 22px; background: #15803d; border-radius: 12px; border: 3px solid #fff; left: 100px; }
-    /* Football */
+    #paddle { position: absolute; bottom: 10px; height: 22px; background: #15803d; border-radius: 12px; border: 3px solid #fff; left: 100px; transition: width .2s; }
+    #paddle.big { background: #22c55e; box-shadow: 0 0 14px #fff; }
     #field { background: repeating-linear-gradient(#bbf7d0 0 40px, #dcfce7 40px 80px); cursor: crosshair; }
     #zone { position: absolute; top: 0; left: 0; right: 0; height: 18px; background: #15803d; color: #fff; font-size: 14px; text-align: center; line-height: 18px; letter-spacing: 6px; }
-    /* Order / quiz / memory */
     .opt { display: block; width: 100%; text-align: left; margin: 8px 0; background: #fff; color: #14532d; border: 3px solid #15803d; }
     .opt:hover { background: #bbf7d0; }
     .opt.used { background: #bbf7d0; opacity: .6; }
-    #memGrid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
-    .card { height: 90px; font-size: 48px; background: #15803d; color: #fff; border-radius: 14px; display: flex; align-items: center; justify-content: center; cursor: pointer; margin: 0; padding: 0; }
-    .card.up { background: #fff; color: #000; border: 3px solid #15803d; }
-    .card.matched { background: #bbf7d0; border: 3px solid #22c55e; }
-    /* Odyssey sea */
-    #sea { background: linear-gradient(#7dd3fc, #0ea5e9); height: 300px; }
+    .opt.good { background: #4ade80; }
+    #timerWrap { height: 14px; background: #dcfce7; border: 2px solid #15803d; border-radius: 10px; overflow: hidden; margin: 6px 0; }
+    #timerBar { height: 100%; width: 100%; background: #22c55e; }
+    #memGrid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; perspective: 600px; }
+    .card { height: 80px; font-size: 44px; background: #15803d; color: #fff; border-radius: 14px; display: flex; align-items: center; justify-content: center; cursor: pointer; margin: 0; padding: 0; transition: transform .3s, background .2s; }
+    .card.up { background: #fff; color: #000; border: 3px solid #15803d; transform: rotateY(360deg); }
+    .card.matched { background: #bbf7d0; border: 3px solid #22c55e; box-shadow: 0 0 12px #22c55e; }
+    #sea { background: linear-gradient(#7dd3fc, #0ea5e9); height: 320px; }
+    #sea.slow { background: linear-gradient(#bbf7d0, #4ade80); }
     .lane { position: absolute; top: 0; bottom: 0; width: 33.333%; border-right: 2px dashed rgba(255,255,255,.6); }
-    #heart { font-size: 100px; text-align: center; cursor: pointer; user-select: none; }
+    #heartWrap { height: 130px; position: relative; }
+    #heart { font-size: 100px; text-align: center; cursor: pointer; user-select: none; position: relative; transition: left .15s; display: inline-block; animation: beat .5s infinite alternate; }
+    @keyframes beat { to { transform: scale(1.18); } }
     footer { background: #15803d; color: #fff; text-align: center; padding: 20px; font-size: 26px; }
   </style>
 </head>
@@ -69,99 +85,97 @@
   </header>
 
   <div id="hud">
-    <span>⭐ Score: <span id="score">0</span></span>
+    <span>⭐ <span id="score">0</span></span>
+    <span id="combo">🔥 x1</span>
     <div id="barWrap"><div id="bar"></div></div>
     <span id="lvl">Level 1 / 9</span>
+    <button id="mute">🔊</button>
   </div>
 
   <main>
-    <!-- 1 Flying -->
     <section class="level" id="l1">
       <h2>✈️ Level 1: Hobby – Flying</h2>
-      <p>Move your mouse or finger up and down to steer the plane. Collect 6 ⭐ and dodge the 🐦 birds (a hit costs a star)!</p>
+      <p>Steer the plane up and down. Collect 12 ⭐. Dodge 🐦 birds (−2) and 🌩️ storms (−3). Grab a 🛡️ shield to block one hit! Keep a streak going for a 🔥 combo score boost.</p>
       <div class="play" id="sky"><div class="sprite" id="plane" style="left:30px;top:110px">✈️</div></div>
-      <p class="msg" id="skyMsg">Stars: 0 / 6</p>
+      <p class="msg" id="skyMsg">Stars: 0 / 12</p>
       <button id="startSky">🛫 Take Off!</button>
     </section>
 
-    <!-- 2 Pickleball -->
     <section class="level locked" id="l2">
       <h2>🏓 Level 2: Hobby – Pickleball Rally</h2>
-      <p>Slide the paddle with your mouse or finger. Return the ball 7 times in a row!</p>
-      <div class="play" id="court"><div class="sprite" id="pball" style="left:0;top:0">🟡</div><div id="paddle"></div></div>
-      <p class="msg" id="pMsg">Returns: 0 / 7</p>
+      <p>Small paddle, 3 ❤️ lives, 15 returns. Extra balls join at 5 and 10, and a 💚 power-up widens your paddle for 6 seconds. Hit near the paddle's edge to angle your shot!</p>
+      <div class="play" id="court"><div id="paddle"></div></div>
+      <p class="msg" id="pMsg">Returns: 0 / 15 &nbsp; Lives: ❤️❤️❤️</p>
       <button id="startPb">🏓 Serve!</button>
     </section>
 
-    <!-- 3 Football -->
     <section class="level locked" id="l3">
       <h2>🏈 Level 3: Hobby – Football Passing</h2>
-      <p>Tap the field to throw. Aim ahead of the moving receiver 🏃 for 3 touchdowns!</p>
+      <p>Tap the field to throw. 5 touchdowns in 9 throws! The receiver zigzags and 🛡️ defenders intercept passes that go near them. Aim ahead of him!</p>
       <div class="play" id="field">
         <div id="zone">END ZONE</div>
         <div class="sprite" id="recv" style="top:30px">🏃</div>
+        <div class="sprite" id="def1" style="top:105px">🛡️</div>
+        <div class="sprite" id="def2" style="top:150px">🛡️</div>
         <div class="sprite" id="fball" style="display:none">🏈</div>
         <div class="sprite" id="qb" style="bottom:8px;left:50%;margin-left:-22px">🧍</div>
       </div>
-      <p class="msg" id="fMsg">Touchdowns: 0 / 3</p>
+      <p class="msg" id="fMsg">Touchdowns: 0 / 5 &nbsp; Throws left: 9</p>
       <button id="startFb">🏈 Hike!</button>
     </section>
 
-    <!-- 4 Science -->
     <section class="level locked" id="l4">
       <h2>🔬 Level 4: Skill – Science Lab Quiz</h2>
+      <p>6 questions, 3 ❤️ lives, and a countdown on every question. Answer fast! Time running out costs a life.</p>
+      <div id="timerWrap"><div id="timerBar"></div></div>
       <div id="sciBox"></div>
       <div class="msg" id="sciMsg"></div>
     </section>
 
-    <!-- 5 History -->
     <section class="level locked" id="l5">
       <h2>📜 Level 5: Skill – History Timeline</h2>
-      <p>Tap the events in order from <b>oldest to newest</b>!</p>
+      <p>Tap the 7 events from <b>oldest to newest</b>. 3 mistakes and it reshuffles!</p>
       <div id="histBox"></div>
-      <div class="msg" id="histMsg">Next up: pick the oldest event.</div>
+      <div class="msg" id="histMsg">Next up: pick the oldest event. Mistakes: 0 / 3</div>
     </section>
 
-    <!-- 6 Doctor -->
     <section class="level locked" id="l6">
       <h2>🩺 Level 6: Goal – Doctor's Memory Match</h2>
-      <p>Flip cards to match all 4 pairs of medical gear!</p>
+      <p>Match all 8 pairs in 24 flips or fewer. Back-to-back matches build your combo!</p>
       <div id="memGrid"></div>
-      <p class="msg" id="memMsg">Pairs found: 0 / 4</p>
+      <p class="msg" id="memMsg">Pairs found: 0 / 8 &nbsp; Flips left: 24</p>
     </section>
 
-    <!-- 7 Odyssey -->
     <section class="level locked" id="l7">
       <h2>📖 Level 7: Book – Odysseus's Voyage</h2>
-      <p>Sail home like Odysseus! Tap a lane (or use the buttons / arrow keys) to dodge 🌊 waves and 👁️ Cyclops rocks. Dodge 10 hazards. You have 3 ❤️ lives.</p>
+      <p>Dodge 25 hazards: 🌊 waves, 👁️ Cyclops rocks and 🐍 Scylla. Catch the 🐚 shell to slow time for 4 seconds! 3 ❤️ lives. (Arrow keys, lane taps, or buttons.)</p>
       <div class="play" id="sea">
-        <div class="lane" style="left:0" data-lane="0"></div>
-        <div class="lane" style="left:33.333%" data-lane="1"></div>
-        <div class="lane" style="left:66.666%;border-right:none" data-lane="2"></div>
+        <div class="lane" style="left:0"></div>
+        <div class="lane" style="left:33.333%"></div>
+        <div class="lane" style="left:66.666%;border-right:none"></div>
         <div class="sprite" id="ship" style="bottom:10px">🚢</div>
       </div>
-      <p class="msg" id="seaMsg">Dodged: 0 / 10 &nbsp; Lives: ❤️❤️❤️</p>
+      <p class="msg" id="seaMsg">Dodged: 0 / 25 &nbsp; Lives: ❤️❤️❤️</p>
       <button id="left">⬅️</button><button id="right">➡️</button><button id="startSea">⛵ Set Sail!</button>
     </section>
 
-    <!-- 8 Fun fact -->
     <section class="level locked" id="l8">
       <h2>🛩️ Level 8: Fun Fact – Planes vs. Cars</h2>
-      <p>I have more time flying planes than driving cars! Catch 8 ✈️ planes. Tapping a 🚗 car loses one (−1)!</p>
-      <div class="play" id="arena" style="height:220px;background:linear-gradient(#dcfce7,#fff);cursor:crosshair"></div>
-      <p class="msg" id="flyMsg">Planes caught: 0 / 8</p>
+      <p>I have more time flying planes than driving cars! Catch 15 ✈️ planes fast. 🚗 cars cost you 2. A ⭐ golden plane is worth 3! 5 escapes and you crash.</p>
+      <div class="play" id="arena" style="height:240px;background:linear-gradient(#dcfce7,#fff);cursor:crosshair"></div>
+      <p class="msg" id="flyMsg">Planes caught: 0 / 15 &nbsp; Escaped: 0 / 5</p>
       <button id="startFly">🛫 Go!</button>
     </section>
 
-    <!-- 9 Final -->
     <section class="level locked" id="l9">
-      <h2>🏆 Level 9: Final Stage</h2>
+      <h2>🏆 Level 9: Final Boss – Heart Rush</h2>
       <div style="text-align:center">
         <p>Collect all your badges!</p>
         <div id="badges"></div>
-        <p>Tap the heart for Trey's goal: <b>Become a doctor</b>! 10 beats to finish.</p>
-        <div id="heart">❤️</div>
-        <p class="msg" id="finalMsg">Heartbeats: 0 / 10</p>
+        <p>Trey's goal: <b>Become a doctor</b>! Tap the racing heart 20 times in 12 seconds. It jumps around and gets faster!</p>
+        <div id="heartWrap"><div id="heart">❤️</div></div>
+        <p class="msg" id="finalMsg">Heartbeats: 0 / 20</p>
+        <button id="startFinal">🩺 Start!</button>
       </div>
     </section>
   </main>
@@ -170,11 +184,35 @@
 
   <script>
     const TOTAL = 9;
-    let score = 0;
+    let score = 0, combo = 0, muted = false;
     const $ = id => document.getElementById(id);
     const shuffle = a => a.map(v => [Math.random(), v]).sort((x, y) => x[0] - y[0]).map(x => x[1]);
 
-    // Tagline typing
+    // ===== Sound (made with the browser, no files) =====
+    let actx = null;
+    function beep(freq, dur, type, vol, slide) {
+      if (muted) return;
+      try {
+        actx = actx || new (window.AudioContext || window.webkitAudioContext)();
+        const o = actx.createOscillator(), g = actx.createGain();
+        o.type = type || "square"; o.frequency.value = freq;
+        if (slide) o.frequency.linearRampToValueAtTime(slide, actx.currentTime + dur);
+        g.gain.value = vol || 0.08;
+        g.gain.exponentialRampToValueAtTime(0.0001, actx.currentTime + dur);
+        o.connect(g); g.connect(actx.destination); o.start(); o.stop(actx.currentTime + dur);
+      } catch (e) {}
+    }
+    const sfx = {
+      good: () => beep(660, .12, "triangle", .1, 990),
+      hit: () => beep(220, .2, "sawtooth", .1, 80),
+      power: () => { beep(520, .1, "triangle"); setTimeout(() => beep(780, .15, "triangle"), 90); },
+      win: () => [523, 659, 784, 1046].forEach((f, i) => setTimeout(() => beep(f, .2, "triangle", .1), i * 110)),
+      lose: () => beep(300, .5, "sawtooth", .1, 80),
+      click: () => beep(440, .06, "square", .05)
+    };
+    $("mute").onclick = () => { muted = !muted; $("mute").textContent = muted ? "🔇" : "🔊"; };
+
+    // ===== Helpers =====
     const text = "Growing one step at a time";
     let ti = 0;
     (function type() {
@@ -183,6 +221,41 @@
     })();
 
     function addScore(n) { score = Math.max(0, score + n); $("score").textContent = score; }
+    const mult = () => 1 + Math.floor(combo / 5);
+    function updCombo() {
+      $("combo").textContent = "🔥 x" + mult() + (combo >= 3 ? " (" + combo + ")" : "");
+      $("combo").style.transform = "scale(1.25)"; setTimeout(() => $("combo").style.transform = "", 150);
+    }
+    function good(n, host, x, y) {
+      combo++; const pts = n * mult(); addScore(pts); updCombo(); sfx.good();
+      if (host) floatText(host, "+" + pts, x, y);
+    }
+    function bad(n, host, x, y) {
+      if (combo >= 5) floatText(host || document.body, "Combo lost!", x || 20, y || 20, true);
+      combo = 0; addScore(-n); updCombo(); sfx.hit();
+      if (host) { floatText(host, "-" + n, x, y, true); host.classList.remove("flash"); void host.offsetWidth; host.classList.add("flash"); shakeEl(host); }
+    }
+    function floatText(host, txt, x, y, isBad) {
+      const f = document.createElement("div");
+      f.className = "float" + (isBad ? " bad" : ""); f.textContent = txt;
+      f.style.left = (x == null ? 20 : x) + "px"; f.style.top = (y == null ? 20 : y) + "px";
+      if (getComputedStyle(host).position === "static") host.style.position = "relative";
+      host.appendChild(f); setTimeout(() => f.remove(), 900);
+    }
+    function sparks(host, x, y, emoji, n) {
+      for (let k = 0; k < (n || 6); k++) {
+        const p = document.createElement("div");
+        p.className = "part"; p.textContent = emoji || "✨";
+        p.style.left = x + "px"; p.style.top = y + "px"; host.appendChild(p);
+        const a = Math.random() * 6.283, d = 30 + Math.random() * 40;
+        requestAnimationFrame(() => { p.style.transform = "translate(" + Math.cos(a) * d + "px," + Math.sin(a) * d + "px)"; p.style.opacity = 0; });
+        setTimeout(() => p.remove(), 700);
+      }
+    }
+    function banner(t) {
+      const b = document.createElement("div"); b.className = "bigBanner"; b.textContent = t;
+      document.body.appendChild(b); setTimeout(() => b.remove(), 1700);
+    }
     function burst(emoji, n) {
       for (let k = 0; k < n; k++) {
         const c = document.createElement("div");
@@ -193,54 +266,66 @@
         setTimeout(() => c.remove(), 4500);
       }
     }
+    function shakeEl(el) { el.classList.add("shake"); setTimeout(() => el.classList.remove("shake"), 300); }
+    const hearts = n => "❤️".repeat(Math.max(0, n)) || "💔";
 
     const badgeList = ["✈️","🏓","🏈","🔬","📜","🩺","📖","🛩️"];
+    const levelNames = ["", "Flying", "Pickleball", "Football", "Science", "History", "Doctor", "Odyssey", "Planes"];
     function completeLevel(n) {
       $("l" + n).classList.add("done");
       if (n <= 8) $("badges").innerHTML += '<span class="badge">' + badgeList[n - 1] + '</span>';
       $("bar").style.width = (n / TOTAL * 100) + "%";
-      addScore(50); burst("⭐", 12);
+      addScore(50); burst("⭐", 14); sfx.win(); banner("🎉 " + (levelNames[n] || "Boss") + " CLEARED!");
       if (n < TOTAL) {
         const next = $("l" + (n + 1));
         next.classList.remove("locked");
         $("lvl").textContent = "Level " + (n + 1) + " / " + TOTAL;
-        next.scrollIntoView({ behavior: "smooth", block: "center" });
+        setTimeout(() => next.scrollIntoView({ behavior: "smooth", block: "center" }), 900);
       }
     }
+    function failed(msgId, text) { $(msgId).textContent = text; sfx.lose(); combo = 0; updCombo(); }
 
     // ===== 1. Flying =====
     const sky = $("sky"), plane = $("plane");
-    let skyRun = false, planeY = 110, stars = 0, skyItems = [], skyLast = 0, skySpawn = 0;
-    sky.addEventListener("pointermove", e => {
+    let skyRun = false, planeY = 110, lastPY = 110, stars = 0, skyItems = [], skyLast = 0, skySpawn = 0, shield = false;
+    for (let i = 0; i < 3; i++) { const c = document.createElement("div"); c.className = "bgc"; c.textContent = "☁️"; c.style.top = (20 + i * 80) + "px"; c.style.animationDelay = (-i * 3) + "s"; c.style.animationDuration = (7 + i * 2) + "s"; sky.insertBefore(c, plane); }
+    function movePlane(e) {
       const r = sky.getBoundingClientRect();
       planeY = Math.max(0, Math.min(r.height - 44, e.clientY - r.top - 22));
       plane.style.top = planeY + "px";
-    });
-    sky.addEventListener("pointerdown", e => sky.dispatchEvent(new PointerEvent("pointermove", e)));
+      plane.style.transform = "rotate(" + Math.max(-25, Math.min(25, (planeY - lastPY) * 2)) + "deg)"; lastPY = planeY;
+    }
+    sky.addEventListener("pointermove", movePlane);
+    sky.addEventListener("pointerdown", movePlane);
     function skyLoop(now) {
       if (!skyRun) return;
       const dt = Math.min(40, now - skyLast) / 16; skyLast = now;
       const W = sky.clientWidth, H = sky.clientHeight;
+      const speed = 5 + stars * 0.4;
       if (now > skySpawn) {
-        skySpawn = now + 650;
-        const bird = Math.random() < 0.4;
+        skySpawn = now + Math.max(280, 520 - stars * 20);
+        const r = Math.random();
+        const kind = r < 0.33 ? "star" : r < 0.40 ? (shield ? "star" : "shield") : r < 0.8 ? "bird" : (stars >= 4 ? "storm" : "bird");
         const el = document.createElement("div");
-        el.className = "sprite"; el.textContent = bird ? "🐦" : "⭐";
-        const it = { el, bird, x: W, y: Math.random() * (H - 44) };
+        el.className = "sprite"; el.textContent = { star: "⭐", shield: "🛡️", bird: "🐦", storm: "🌩️" }[kind];
+        const it = { el, kind, x: W, y: Math.random() * (H - 44), wob: Math.random() * 6 };
         skyItems.push(it); sky.appendChild(el);
       }
       skyItems = skyItems.filter(it => {
-        it.x -= 4 * dt;
+        it.x -= (it.kind === "storm" ? speed * 1.3 : speed) * dt;
+        if (it.kind === "bird") it.y += Math.sin((now / 200) + it.wob) * 1.8 * dt;
         it.el.style.left = it.x + "px"; it.el.style.top = it.y + "px";
         const hit = it.x < 74 && it.x > -10 && Math.abs(it.y - planeY) < 38;
         if (hit) {
           it.el.remove();
-          if (it.bird) { stars = Math.max(0, stars - 1); addScore(-2); sky.classList.add("shake"); setTimeout(() => sky.classList.remove("shake"), 300); }
-          else { stars++; addScore(5); }
-          $("skyMsg").textContent = "Stars: " + stars + " / 6";
-          if (stars >= 6) {
+          if (it.kind === "star") { stars++; good(5, sky, 40, planeY); sparks(sky, 60, planeY + 20, "✨", 6); }
+          else if (it.kind === "shield") { shield = true; plane.classList.add("shield"); sfx.power(); floatText(sky, "Shield!", 40, planeY); }
+          else if (shield) { shield = false; plane.classList.remove("shield"); sfx.power(); floatText(sky, "Blocked!", 40, planeY); sparks(sky, 60, planeY + 20, "🛡️", 4); }
+          else { stars = Math.max(0, stars - (it.kind === "storm" ? 3 : 2)); bad(3, sky, 40, planeY); }
+          $("skyMsg").textContent = "Stars: " + stars + " / 12";
+          if (stars >= 12) {
             skyRun = false; skyItems.forEach(i => i.el.remove()); skyItems = [];
-            $("skyMsg").textContent = "🛬 Perfect flight! 6 stars collected!";
+            $("skyMsg").textContent = "🛬 Perfect flight! 12 stars collected!";
             $("startSky").disabled = true; completeLevel(1);
           }
           return false;
@@ -251,16 +336,17 @@
       if (skyRun) requestAnimationFrame(skyLoop);
     }
     $("startSky").addEventListener("click", () => {
-      if (skyRun) return;
-      stars = 0; skyRun = true; skyLast = performance.now(); skySpawn = 0;
-      $("skyMsg").textContent = "Stars: 0 / 6";
+      if (skyRun) return; sfx.click();
+      stars = 0; shield = false; plane.classList.remove("shield"); skyRun = true; skyLast = performance.now(); skySpawn = 0;
+      $("skyMsg").textContent = "Stars: 0 / 12";
       requestAnimationFrame(skyLoop);
     });
 
     // ===== 2. Pickleball =====
-    const court = $("court"), pball = $("pball"), paddle = $("paddle");
-    let pbRun = false, bx = 0, by = 0, bvx = 0, bvy = 0, pbHits = 0, padX = 100;
-    const BALL = 44, PADW = 120;
+    const court = $("court"), paddle = $("paddle");
+    let pbRun = false, balls = [], pbHits = 0, padX = 100, pbLives = 3, PADW = 90, bigTimer = null, pups = [];
+    const BALL = 40;
+    paddle.style.width = PADW + "px";
     function setPaddle(x) {
       const r = court.getBoundingClientRect();
       padX = Math.max(0, Math.min(r.width - PADW, x - r.left - PADW / 2));
@@ -268,145 +354,244 @@
     }
     court.addEventListener("pointermove", e => setPaddle(e.clientX));
     court.addEventListener("pointerdown", e => setPaddle(e.clientX));
+    function setPadWidth(w) { PADW = w; paddle.style.width = w + "px"; paddle.classList.toggle("big", w > 90); }
+    function pbStatus() { $("pMsg").innerHTML = "Returns: " + pbHits + " / 15 &nbsp; Lives: " + hearts(pbLives); }
+    function newBall() {
+      const el = document.createElement("div");
+      el.className = "sprite"; el.style.fontSize = "36px"; el.textContent = "🟡";
+      el.style.filter = "drop-shadow(0 0 6px #facc15)";
+      court.appendChild(el);
+      balls.push({ el, x: Math.random() * (court.clientWidth - BALL), y: 5, vx: (Math.random() < .5 ? -1 : 1) * (2 + Math.random() * 3), vy: 4 + pbHits * 0.2, tr: 0 });
+    }
+    function clearBalls() { balls.forEach(b => b.el.remove()); balls = []; pups.forEach(p => p.el.remove()); pups = []; }
     function pbLoop() {
       if (!pbRun) return;
       const W = court.clientWidth, H = court.clientHeight;
-      bx += bvx; by += bvy;
-      if (bx < 0) { bx = 0; bvx = Math.abs(bvx); }
-      if (bx > W - BALL) { bx = W - BALL; bvx = -Math.abs(bvx); }
-      if (by < 0) { by = 0; bvy = Math.abs(bvy); }
-      const padTop = H - 32;
-      if (bvy > 0 && by + BALL >= padTop && by + BALL <= padTop + 24) {
-        const cx = bx + BALL / 2;
-        if (cx >= padX - 10 && cx <= padX + PADW + 10) {
-          bvy = -Math.min(Math.abs(bvy) * 1.06, 9);
-          bvx = Math.max(-8, Math.min(8, bvx * 1.04 + ((cx - (padX + PADW / 2)) / PADW) * 3));
-          pbHits++; addScore(3);
-          $("pMsg").textContent = "Returns: " + pbHits + " / 7";
-          if (pbHits >= 7) {
-            pbRun = false; $("pMsg").textContent = "🏓 Game, set, match!";
-            $("startPb").disabled = true; completeLevel(2); return;
+      const padTop = H - 34;
+      for (const p of pups.slice()) {
+        p.y += 2.5; p.el.style.top = p.y + "px";
+        if (p.y + 36 >= padTop && p.y <= padTop + 20 && p.x + 22 >= padX && p.x <= padX + PADW) {
+          p.el.remove(); pups = pups.filter(q => q !== p); sfx.power(); setPadWidth(150); floatText(court, "Big paddle!", padX, padTop - 40);
+          clearTimeout(bigTimer); bigTimer = setTimeout(() => setPadWidth(90), 6000);
+        } else if (p.y > H) { p.el.remove(); pups = pups.filter(q => q !== p); }
+      }
+      for (const b of balls.slice()) {
+        b.x += b.vx; b.y += b.vy;
+        if (++b.tr % 3 === 0) { const t = document.createElement("div"); t.className = "part"; t.textContent = "•"; t.style.color = "#facc15"; t.style.left = (b.x + 16) + "px"; t.style.top = (b.y + 16) + "px"; t.style.transition = "opacity .4s"; court.appendChild(t); requestAnimationFrame(() => t.style.opacity = 0); setTimeout(() => t.remove(), 450); }
+        if (b.x < 0) { b.x = 0; b.vx = Math.abs(b.vx); }
+        if (b.x > W - BALL) { b.x = W - BALL; b.vx = -Math.abs(b.vx); }
+        if (b.y < 0) { b.y = 0; b.vy = Math.abs(b.vy); }
+        if (b.vy > 0 && b.y + BALL >= padTop && b.y + BALL <= padTop + 22) {
+          const cx = b.x + BALL / 2;
+          if (cx >= padX - 8 && cx <= padX + PADW + 8) {
+            b.vy = -Math.min(Math.abs(b.vy) * 1.05 + 0.2, 11);
+            b.vx = Math.max(-9, Math.min(9, b.vx * 1.03 + ((cx - (padX + PADW / 2)) / PADW) * 5));
+            pbHits++; good(3, court, cx, padTop - 30); sparks(court, cx, padTop, "✨", 5); pbStatus();
+            if (pbHits === 5 || pbHits === 10) newBall();
+            if ((pbHits === 3 || pbHits === 8 || pbHits === 12) && PADW === 90) {
+              const el = document.createElement("div"); el.className = "sprite"; el.style.fontSize = "34px"; el.textContent = "💚"; court.appendChild(el);
+              const x = Math.random() * (W - 50); el.style.left = x + "px"; pups.push({ el, x, y: 0 });
+            }
+            if (pbHits >= 15) {
+              pbRun = false; clearBalls(); clearTimeout(bigTimer); setPadWidth(90);
+              $("pMsg").textContent = "🏓 Game, set, match!";
+              $("startPb").disabled = true; completeLevel(2); return;
+            }
           }
         }
+        if (b.y > H) {
+          b.el.remove(); balls = balls.filter(x => x !== b);
+          pbLives--; bad(3, court, Math.max(10, b.x), H - 60); pbStatus();
+          if (pbLives <= 0) {
+            pbRun = false; clearBalls(); clearTimeout(bigTimer); setPadWidth(90);
+            failed("pMsg", "💨 Out of lives! Press Serve to try again.");
+            $("startPb").disabled = false; return;
+          }
+          if (balls.length === 0) newBall();
+        }
+        b.el.style.left = b.x + "px"; b.el.style.top = b.y + "px";
       }
-      if (by > H) { pbRun = false; $("pMsg").textContent = "💨 Missed it! Press Serve to try again."; $("startPb").disabled = false; return; }
-      pball.style.left = bx + "px"; pball.style.top = by + "px";
       requestAnimationFrame(pbLoop);
     }
     $("startPb").addEventListener("click", () => {
-      if (pbRun) return;
-      pbHits = 0; pbRun = true;
-      bx = court.clientWidth / 2 - BALL / 2; by = 10;
-      bvx = (Math.random() < .5 ? -1 : 1) * 3; bvy = 3.5;
-      $("pMsg").textContent = "Returns: 0 / 7"; $("startPb").disabled = true;
+      if (pbRun) return; sfx.click();
+      clearBalls(); pbHits = 0; pbLives = 3; pbRun = true; setPadWidth(90);
+      newBall(); pbStatus(); $("startPb").disabled = true;
       requestAnimationFrame(pbLoop);
     });
 
     // ===== 3. Football =====
-    const field = $("field"), recv = $("recv"), fball = $("fball");
-    let fbRun = false, throwing = false, tds = 0, fbStart = 0;
-    const recvX = () => (field.clientWidth - 44) * (0.5 + 0.5 * Math.sin((performance.now() - fbStart) / 650));
-    function fbLoop() { if (!fbRun) return; recv.style.left = recvX() + "px"; requestAnimationFrame(fbLoop); }
+    const field = $("field"), recv = $("recv"), fball = $("fball"), def1 = $("def1"), def2 = $("def2");
+    let fbRun = false, throwing = false, tds = 0, fbStart = 0, throwsLeft = 9;
+    const wave = (t, period, ph) => 0.5 + 0.5 * Math.sin(t / period + ph);
+    const FW = () => field.clientWidth - 44;
+    const recvX = () => { const t = performance.now() - fbStart; return FW() * (0.5 + 0.5 * Math.sin(t / 500 + Math.sin(t / 1100) * 2.2)); };
+    const d1X = () => FW() * wave(performance.now() - fbStart, 420, 1);
+    const d2X = () => FW() * wave(performance.now() - fbStart, 600, 3);
+    function fbStatus(extra) { $("fMsg").textContent = (extra ? extra + " " : "") + "Touchdowns: " + tds + " / 5 · Throws left: " + throwsLeft; }
+    function fbLoop() {
+      if (!fbRun) return;
+      recv.style.left = recvX() + "px"; def1.style.left = d1X() + "px"; def2.style.left = d2X() + "px";
+      requestAnimationFrame(fbLoop);
+    }
     field.addEventListener("pointerdown", e => {
       if (!fbRun || throwing) return;
       const r = field.getBoundingClientRect();
       const tx = Math.max(20, Math.min(r.width - 20, e.clientX - r.left));
       const sx = r.width / 2, sy = r.height - 60, ty = 50;
-      throwing = true; fball.style.display = "block";
+      throwing = true; fball.style.display = "block"; throwsLeft--; beep(300, .25, "sine", .08, 600);
       const t0 = performance.now();
       (function fly(now) {
-        const p = Math.min(1, (now - t0) / 550);
+        const p = Math.min(1, (now - t0) / 500);
         fball.style.left = (sx + (tx - sx) * p - 22) + "px";
-        fball.style.top = (sy + (ty - sy) * p - 22) + "px";
+        fball.style.top = (sy + (ty - sy) * p - 22 - Math.sin(p * Math.PI) * 30) + "px";
+        fball.style.transform = "rotate(" + p * 540 + "deg)";
         if (p < 1) return requestAnimationFrame(fly);
         fball.style.display = "none"; throwing = false;
-        if (Math.abs(recvX() + 22 - tx) < 45) {
-          tds++; addScore(10); burst("🏈", 6);
-          $("fMsg").textContent = "🎉 TOUCHDOWN! Touchdowns: " + tds + " / 3";
-          if (tds >= 3) { fbRun = false; $("fMsg").textContent = "🏆 Hat trick!"; $("startFb").disabled = true; completeLevel(3); }
-        } else $("fMsg").textContent = "❌ Incomplete! Lead the receiver more. Touchdowns: " + tds + " / 3";
+        let picked = false;
+        for (const [dx, dy] of [[d1X(), 105], [d2X(), 150]]) {
+          const pp = (sy - dy) / (sy - ty);
+          const bxAt = sx + (tx - sx) * pp;
+          if (Math.abs(dx + 22 - bxAt) < 30) picked = true;
+        }
+        if (picked) { bad(3, field, tx - 20, 100); fbStatus("🛡️ INTERCEPTED!"); }
+        else if (Math.abs(recvX() + 22 - tx) < 38) {
+          tds++; good(10, field, tx - 20, 60); sparks(field, tx, 55, "🏈", 6); burst("🏈", 5); fbStatus("🎉 TOUCHDOWN!");
+          if (tds >= 5) { fbRun = false; $("fMsg").textContent = "🏆 MVP performance!"; $("startFb").disabled = true; completeLevel(3); return; }
+        } else { combo = 0; updCombo(); beep(200, .2, "sawtooth", .06); floatText(field, "Incomplete", tx - 40, 60, true); fbStatus("❌ Incomplete!"); }
+        if (throwsLeft <= 0 && fbRun) {
+          fbRun = false; failed("fMsg", "⏱️ Out of throws! You scored " + tds + " / 5. Press Hike to try again.");
+          $("startFb").disabled = false;
+        }
       })(t0);
     });
     $("startFb").addEventListener("click", () => {
-      if (fbRun) return;
-      fbRun = true; tds = 0; fbStart = performance.now();
-      $("fMsg").textContent = "Touchdowns: 0 / 3"; $("startFb").disabled = true;
+      if (fbRun) return; sfx.click();
+      fbRun = true; tds = 0; throwsLeft = 9; fbStart = performance.now();
+      $("startFb").disabled = true; fbStatus("");
       requestAnimationFrame(fbLoop);
     });
 
-    // ===== 4. Science quiz =====
+    // ===== 4. Science quiz (timed) =====
     const sciQs = [
-      { q: "Which organ pumps blood around the body? 🫀", o: ["Heart", "Stomach", "Kidney"], a: "Heart" },
-      { q: "What do red blood cells carry? 🩸", o: ["Oxygen", "Sunlight", "Bones"], a: "Oxygen" },
-      { q: "Which part of a cell holds its DNA? 🧬", o: ["Nucleus", "Cell wall", "Vacuole"], a: "Nucleus" }
+      { q: "Which organ pumps blood around the body? 🫀", o: ["Heart", "Stomach", "Kidney", "Liver"], a: "Heart" },
+      { q: "What gas do red blood cells mainly carry? 🩸", o: ["Oxygen", "Helium", "Nitrogen", "Methane"], a: "Oxygen" },
+      { q: "Which organelle makes most of a cell's ATP energy? ⚡", o: ["Mitochondria", "Ribosome", "Nucleus", "Vacuole"], a: "Mitochondria" },
+      { q: "What is the pH of a neutral solution like pure water? 🧪", o: ["7", "1", "10", "14"], a: "7" },
+      { q: "Which blood cells fight infections? 🛡️", o: ["White blood cells", "Red blood cells", "Platelets", "Plasma"], a: "White blood cells" },
+      { q: "DNA's four bases are A, T, C and what? 🧬", o: ["G", "U", "P", "L"], a: "G" }
     ];
-    let sciI = 0;
+    let sciI = 0, sciLives = 3, sciTimer = null, sciActive = false;
+    const SCI_TIME = 12;
+    function startSciTimer() {
+      clearInterval(sciTimer);
+      let t0 = performance.now();
+      sciTimer = setInterval(() => {
+        const left = SCI_TIME - (performance.now() - t0) / 1000;
+        $("timerBar").style.width = Math.max(0, left / SCI_TIME * 100) + "%";
+        $("timerBar").style.background = left < 4 ? "#ef4444" : "#22c55e";
+        if (left <= 0) { clearInterval(sciTimer); loseSciLife("⏰ Time's up!"); }
+      }, 100);
+    }
+    function loseSciLife(msg) {
+      sciLives--; bad(3, $("l4"), 30, 60);
+      if (sciLives <= 0) { sciLives = 3; sciI = 0; failed("sciMsg", "💥 Out of lives! Quiz restarted."); }
+      else $("sciMsg").textContent = msg + " Lives left: " + sciLives;
+      showSci();
+    }
     function showSci() {
       const q = sciQs[sciI];
-      $("sciBox").innerHTML = '<p><b>Question ' + (sciI + 1) + ' / 3:</b> ' + q.q + '</p>';
+      $("sciBox").innerHTML = '<p><b>Question ' + (sciI + 1) + ' / 6 · Lives: ' + hearts(sciLives) + '</b><br>' + q.q + '</p>';
       shuffle(q.o).forEach(o => {
         const b = document.createElement("button");
         b.className = "opt"; b.textContent = o;
         b.onclick = () => {
+          clearInterval(sciTimer);
           if (o === q.a) {
-            addScore(10); burst("🔬", 4); sciI++;
-            if (sciI >= sciQs.length) { $("sciBox").innerHTML = ""; $("sciMsg").textContent = "🔬 Lab complete! 3 / 3 correct!"; completeLevel(4); }
-            else { $("sciMsg").textContent = "✅ Correct!"; showSci(); }
-          } else { $("sciMsg").textContent = "❌ Not quite, try again!"; addScore(-2); b.classList.add("shake"); setTimeout(() => b.classList.remove("shake"), 300); }
+            b.classList.add("good"); good(10, $("l4"), 30, 60); burst("🔬", 4); sciI++;
+            if (sciI >= sciQs.length) { $("sciBox").innerHTML = ""; $("timerBar").style.width = "100%"; $("sciMsg").textContent = "🔬 Lab complete! All 6 correct!"; completeLevel(4); }
+            else { $("sciMsg").textContent = "✅ Correct!"; setTimeout(showSci, 350); }
+          } else loseSciLife("❌ Not quite!");
         };
         $("sciBox").appendChild(b);
       });
+      startSciTimer();
     }
-    showSci();
+    // Quiz timer begins only when level 4 unlocks
+    const sciObs = new MutationObserver(() => {
+      if (!$("l4").classList.contains("locked") && !sciActive) { sciActive = true; showSci(); sciObs.disconnect(); }
+    });
+    sciObs.observe($("l4"), { attributes: true });
 
     // ===== 5. History timeline =====
     const events = [
-      { t: "🔺 Pyramids of Giza are built (about 2500 BCE)", n: 0 },
+      { t: "🔺 Great Pyramid of Giza is built (about 2560 BCE)", n: 0 },
       { t: "🏛️ First ancient Olympic Games (776 BCE)", n: 1 },
-      { t: "🦅 Roman Empire begins under Augustus (27 BCE)", n: 2 },
-      { t: "🏰 Western Roman Empire falls (476 CE)", n: 3 }
+      { t: "⚔️ Battle of Marathon (490 BCE)", n: 2 },
+      { t: "🦅 Roman Empire begins under Augustus (27 BCE)", n: 3 },
+      { t: "🏰 Western Roman Empire falls (476 CE)", n: 4 },
+      { t: "🌎 Columbus reaches the Americas (1492)", n: 5 },
+      { t: "🔔 U.S. Declaration of Independence (1776)", n: 6 }
     ];
-    let histNext = 0;
-    shuffle(events).forEach(ev => {
-      const b = document.createElement("button");
-      b.className = "opt"; b.textContent = ev.t;
-      b.onclick = () => {
-        if (b.classList.contains("used")) return;
-        if (ev.n === histNext) {
-          b.classList.add("used"); histNext++; addScore(8);
-          $("histMsg").textContent = histNext < 4 ? "✅ Right! Now pick the next oldest." : "";
-          if (histNext === 4) { $("histMsg").textContent = "📜 Perfect timeline!"; completeLevel(5); }
-        } else { $("histMsg").textContent = "❌ That one is newer. Try an older event!"; addScore(-2); b.classList.add("shake"); setTimeout(() => b.classList.remove("shake"), 300); }
-      };
-      $("histBox").appendChild(b);
-    });
+    let histNext = 0, histMiss = 0;
+    function buildHist() {
+      $("histBox").innerHTML = ""; histNext = 0; histMiss = 0;
+      shuffle(events).forEach(ev => {
+        const b = document.createElement("button");
+        b.className = "opt"; b.textContent = ev.t;
+        b.onclick = () => {
+          if (b.classList.contains("used")) return;
+          if (ev.n === histNext) {
+            b.classList.add("used"); histNext++; good(8, $("l5"), 30, 30);
+            $("histMsg").textContent = histNext < events.length ? "✅ Right! Next oldest? Mistakes: " + histMiss + " / 3" : "";
+            if (histNext === events.length) { $("histMsg").textContent = "📜 Perfect timeline!"; completeLevel(5); }
+          } else {
+            histMiss++; bad(2, $("l5"), 30, 30);
+            if (histMiss >= 3) { failed("histMsg", "💥 3 mistakes! The timeline reshuffled. Try again!"); buildHist(); }
+            else $("histMsg").textContent = "❌ Not the oldest remaining! Mistakes: " + histMiss + " / 3";
+          }
+        };
+        $("histBox").appendChild(b);
+      });
+    }
+    buildHist();
 
     // ===== 6. Memory match =====
-    let flipped = [], matched = 0, lock = false;
-    shuffle(["🩺","💉","🩹","💊","🩺","💉","🩹","💊"]).forEach(sym => {
-      const c = document.createElement("button");
-      c.className = "card"; c.textContent = "❓"; c.dataset.sym = sym;
-      c.onclick = () => {
-        if (lock || c.classList.contains("up") || c.classList.contains("matched")) return;
-        c.classList.add("up"); c.textContent = sym; flipped.push(c);
-        if (flipped.length === 2) {
-          const [a, b] = flipped; flipped = [];
-          if (a.dataset.sym === b.dataset.sym) {
-            a.classList.add("matched"); b.classList.add("matched"); matched++; addScore(8);
-            $("memMsg").textContent = "Pairs found: " + matched + " / 4";
-            if (matched === 4) { $("memMsg").textContent = "🩺 All pairs matched. Future doctor!"; completeLevel(6); }
-          } else {
-            lock = true;
-            setTimeout(() => { [a, b].forEach(x => { x.classList.remove("up"); x.textContent = "❓"; }); lock = false; }, 800);
+    let flipped = [], matched = 0, lock = false, flipsLeft = 24;
+    function buildMem() {
+      $("memGrid").innerHTML = ""; flipped = []; matched = 0; lock = false; flipsLeft = 24;
+      const syms = ["🩺","💉","🩹","💊","🧬","🔬","🦴","🫀"];
+      shuffle(syms.concat(syms)).forEach(sym => {
+        const c = document.createElement("button");
+        c.className = "card"; c.textContent = "❓"; c.dataset.sym = sym;
+        c.onclick = () => {
+          if (lock || c.classList.contains("up") || c.classList.contains("matched")) return;
+          sfx.click(); c.classList.add("up"); c.textContent = sym; flipped.push(c);
+          if (flipped.length === 2) {
+            const [a, b] = flipped; flipped = []; flipsLeft--;
+            if (a.dataset.sym === b.dataset.sym) {
+              a.classList.add("matched"); b.classList.add("matched"); matched++; good(8, $("l6"), 30, 30);
+              if (matched === 8) { $("memMsg").textContent = "🩺 All pairs matched. Future doctor!"; completeLevel(6); return; }
+            } else {
+              combo = 0; updCombo(); lock = true;
+              setTimeout(() => { [a, b].forEach(x => { x.classList.remove("up"); x.textContent = "❓"; }); lock = false; }, 700);
+            }
+            if (flipsLeft <= 0 && matched < 8) {
+              failed("memMsg", "💥 Out of flips! Shuffling a new board...");
+              lock = true; setTimeout(buildMem, 1200); return;
+            }
+            $("memMsg").innerHTML = "Pairs found: " + matched + " / 8 &nbsp; Flips left: " + flipsLeft;
           }
-        }
-      };
-      $("memGrid").appendChild(c);
-    });
+        };
+        $("memGrid").appendChild(c);
+      });
+      $("memMsg").innerHTML = "Pairs found: 0 / 8 &nbsp; Flips left: 24";
+    }
+    buildMem();
 
     // ===== 7. Odyssey voyage =====
     const sea = $("sea"), ship = $("ship");
-    let seaRun = false, lane = 1, dodged = 0, lives = 3, hazards = [], seaLast = 0, seaSpawn = 0;
+    let seaRun = false, lane = 1, dodged = 0, lives = 3, hazards = [], seaLast = 0, seaSpawn = 0, slowUntil = 0;
     function placeShip() { ship.style.left = (sea.clientWidth / 3 * lane + sea.clientWidth / 6 - 22) + "px"; }
     function setLane(l) { lane = Math.max(0, Math.min(2, l)); placeShip(); }
     placeShip(); window.addEventListener("resize", placeShip);
@@ -418,93 +603,142 @@
       if (e.key === "ArrowLeft") { setLane(lane - 1); e.preventDefault(); }
       if (e.key === "ArrowRight") { setLane(lane + 1); e.preventDefault(); }
     });
-    const hearts = () => "❤️".repeat(lives) || "💔";
-    function seaStatus() { $("seaMsg").innerHTML = "Dodged: " + dodged + " / 10 &nbsp; Lives: " + hearts(); }
+    function seaStatus() { $("seaMsg").innerHTML = "Dodged: " + dodged + " / 25 &nbsp; Lives: " + hearts(lives); }
+    function spawnHazard(l, W, shell) {
+      const el = document.createElement("div");
+      el.className = "sprite"; el.textContent = shell ? "🐚" : ["🌊","👁️","🐍"][Math.floor(Math.random() * 3)];
+      el.style.left = (W / 3 * l + W / 6 - 22) + "px";
+      hazards.push({ el, l, y: -44, shell }); sea.appendChild(el);
+    }
     function seaLoop(now) {
       if (!seaRun) return;
       const dt = Math.min(40, now - seaLast) / 16; seaLast = now;
       const H = sea.clientHeight, W = sea.clientWidth;
+      const slow = now < slowUntil; sea.classList.toggle("slow", slow);
+      const speed = (4 + dodged * 0.14) * (slow ? 0.45 : 1);
       if (now > seaSpawn) {
-        seaSpawn = now + 800;
-        const el = document.createElement("div");
-        el.className = "sprite"; el.textContent = Math.random() < .5 ? "🌊" : "👁️";
+        seaSpawn = now + Math.max(330, 700 - dodged * 14);
         const l = Math.floor(Math.random() * 3);
-        const h = { el, l, y: -44 };
-        el.style.left = (W / 3 * l + W / 6 - 22) + "px";
-        hazards.push(h); sea.appendChild(el);
+        if (Math.random() < 0.1) spawnHazard(l, W, true);
+        else {
+          spawnHazard(l, W);
+          if (dodged >= 6 && Math.random() < 0.4) spawnHazard((l + 1 + Math.floor(Math.random() * 2)) % 3, W);
+        }
       }
       hazards = hazards.filter(h => {
-        h.y += 3.2 * dt; h.el.style.top = h.y + "px";
+        h.y += speed * dt; h.el.style.top = h.y + "px";
         if (h.l === lane && h.y > H - 10 - 44 - 30 && h.y < H - 10) {
-          h.el.remove(); lives--; addScore(-3); seaStatus();
-          sea.classList.add("shake"); setTimeout(() => sea.classList.remove("shake"), 300);
+          h.el.remove();
+          if (h.shell) { slowUntil = now + 4000; sfx.power(); floatText(sea, "Time slow!", W / 3 * lane + 10, H - 90); return false; }
+          lives--; bad(3, sea, W / 3 * lane + 10, H - 90); seaStatus();
           if (lives <= 0) {
-            seaRun = false; hazards.forEach(x => x.el.remove()); hazards = [];
-            $("seaMsg").innerHTML = "🌊 Shipwrecked! Press Set Sail to try again.";
+            seaRun = false; hazards.forEach(x => x.el.remove()); hazards = []; sea.classList.remove("slow");
+            failed("seaMsg", "🌊 Shipwrecked! Press Set Sail to try again.");
             $("startSea").disabled = false;
           }
           return false;
         }
-        if (h.y > H) { h.el.remove(); dodged++; addScore(2); seaStatus();
-          if (dodged >= 10) {
-            seaRun = false; hazards.forEach(x => x.el.remove()); hazards = [];
-            $("seaMsg").textContent = "🏝️ Welcome home to Ithaca!";
-            $("startSea").disabled = true; completeLevel(7);
+        if (h.y > H) {
+          h.el.remove();
+          if (!h.shell) {
+            dodged++; good(2); seaStatus();
+            if (dodged >= 25) {
+              seaRun = false; hazards.forEach(x => x.el.remove()); hazards = []; sea.classList.remove("slow");
+              $("seaMsg").textContent = "🏝️ Welcome home to Ithaca!";
+              $("startSea").disabled = true; completeLevel(7);
+            }
           }
-          return false; }
+          return false;
+        }
         return true;
       });
       if (seaRun) requestAnimationFrame(seaLoop);
     }
     $("startSea").addEventListener("click", () => {
-      if (seaRun) return;
-      dodged = 0; lives = 3; seaRun = true; seaLast = performance.now(); seaSpawn = 0; hazards.forEach(x => x.el.remove()); hazards = [];
+      if (seaRun) return; sfx.click();
+      hazards.forEach(x => x.el.remove()); hazards = [];
+      dodged = 0; lives = 3; slowUntil = 0; seaRun = true; seaLast = performance.now(); seaSpawn = 0;
       $("startSea").disabled = true; seaStatus(); requestAnimationFrame(seaLoop);
     });
 
     // ===== 8. Planes vs cars =====
-    let caught = 0, flyTimer = null, running = false;
+    let caught = 0, escaped = 0, flyTimer = null, running = false;
     const arena = $("arena");
+    const flyStatus = () => $("flyMsg").innerHTML = "Planes caught: " + caught + " / 15 &nbsp; Escaped: " + escaped + " / 5";
+    function endFly(win) {
+      running = false; clearInterval(flyTimer); arena.innerHTML = "";
+      if (win) { $("flyMsg").textContent = "🛬 Smooth landing!"; $("startFly").disabled = true; completeLevel(8); }
+      else { failed("flyMsg", "💥 Too many planes escaped! Press Go to try again."); $("startFly").disabled = false; }
+    }
     function spawn() {
       if (!running) return;
-      const isCar = Math.random() < 0.3;
+      const r = Math.random();
+      const kind = r < 0.38 ? "car" : r < 0.46 ? "gold" : "plane";
       const t = document.createElement("div");
       t.className = "sprite pop"; t.style.cursor = "pointer"; t.style.fontSize = "50px";
-      t.textContent = isCar ? "🚗" : "✈️";
-      t.style.left = Math.random() * (arena.clientWidth - 60) + "px";
-      t.style.top = Math.random() * (arena.clientHeight - 60) + "px";
+      t.textContent = kind === "car" ? "🚗" : "✈️";
+      if (kind === "gold") t.style.filter = "drop-shadow(0 0 8px gold) sepia(1) saturate(4)";
+      const px = Math.random() * (arena.clientWidth - 60), py = Math.random() * (arena.clientHeight - 60);
+      t.style.left = px + "px"; t.style.top = py + "px";
+      let alive = true;
       t.addEventListener("pointerdown", e => {
         e.stopPropagation();
-        if (!running) return;
-        t.remove();
-        if (isCar) { addScore(-1); caught = Math.max(0, caught - 1); } else { caught++; addScore(5); }
-        $("flyMsg").textContent = "Planes caught: " + caught + " / 8";
-        if (caught >= 8) {
-          running = false; clearInterval(flyTimer); arena.innerHTML = "";
-          $("flyMsg").textContent = "🛬 Smooth landing!"; $("startFly").disabled = true; completeLevel(8);
-        }
+        if (!running || !alive) return;
+        alive = false; t.remove();
+        if (kind === "car") { caught = Math.max(0, caught - 2); bad(2, arena, px, py); sparks(arena, px + 20, py + 20, "💥", 4); }
+        else { const v = kind === "gold" ? 3 : 1; caught += v; good(5 * v, arena, px, py); sparks(arena, px + 20, py + 20, "✨", 6); }
+        flyStatus();
+        if (caught >= 15) endFly(true);
       });
       arena.appendChild(t);
-      setTimeout(() => t.remove(), 1600);
+      setTimeout(() => {
+        if (!alive) return; alive = false; t.remove();
+        if (kind !== "car" && running) { escaped++; combo = 0; updCombo(); beep(250, .15, "sawtooth", .06); flyStatus(); if (escaped >= 5) endFly(false); }
+      }, 1000);
     }
     $("startFly").addEventListener("click", () => {
-      if (running) return;
-      caught = 0; running = true; $("flyMsg").textContent = "Planes caught: 0 / 8";
-      flyTimer = setInterval(spawn, 600);
+      if (running) return; sfx.click();
+      caught = 0; escaped = 0; running = true; flyStatus();
+      flyTimer = setInterval(spawn, 450);
     });
 
-    // ===== 9. Final =====
-    let beats = 0;
-    $("heart").addEventListener("click", () => {
-      if (beats >= 10) return;
-      beats++; addScore(1);
-      $("finalMsg").textContent = "Heartbeats: " + beats + " / 10";
-      if (beats === 10) {
+    // ===== 9. Final boss =====
+    let beats = 0, finalRun = false, finalTimer = null, timeLeft = 12;
+    const heart = $("heart");
+    function moveHeart() {
+      const w = $("heartWrap").clientWidth - 110;
+      heart.style.left = Math.random() * Math.max(0, w) + "px";
+      heart.style.top = Math.random() * 25 + "px";
+      heart.style.animationDuration = Math.max(0.2, 0.5 - beats * 0.015) + "s";
+    }
+    heart.style.left = "0px";
+    heart.addEventListener("pointerdown", () => {
+      if (!finalRun) return;
+      beats++; good(2, $("heartWrap"), parseFloat(heart.style.left) + 30, 0); beep(200 + beats * 25, .1, "triangle", .1); moveHeart();
+      $("finalMsg").textContent = "Heartbeats: " + beats + " / 20 · Time: " + timeLeft + "s";
+      if (beats >= 20) {
+        finalRun = false; clearInterval(finalTimer);
         $("bar").style.width = "100%";
         $("finalMsg").innerHTML = "🏆 YOU WIN! Final score: " + score + "<br>Trey's goal: become a doctor. 🩺 Growing one step at a time! 🌱";
         ["🌱","✈️","🏓","🏈","🔬","📜","🩺","⭐"].forEach(e => burst(e, 6));
-        $("l9").classList.add("done");
+        sfx.win(); banner("🏆 YOU WIN!");
+        $("l9").classList.add("done"); $("startFinal").disabled = true;
       }
+    });
+    $("startFinal").addEventListener("click", () => {
+      if (finalRun) return; sfx.click();
+      beats = 0; timeLeft = 12; finalRun = true; moveHeart();
+      $("startFinal").disabled = true;
+      $("finalMsg").textContent = "Heartbeats: 0 / 20 · Time: 12s";
+      finalTimer = setInterval(() => {
+        timeLeft--;
+        $("finalMsg").textContent = "Heartbeats: " + beats + " / 20 · Time: " + timeLeft + "s";
+        if (timeLeft <= 0) {
+          finalRun = false; clearInterval(finalTimer);
+          failed("finalMsg", "⏱️ Time's up! You got " + beats + " / 20. Press Start to try again.");
+          $("startFinal").disabled = false;
+        }
+      }, 1000);
     });
   </script>
 </body>
